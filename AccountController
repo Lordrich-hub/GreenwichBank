@@ -1,0 +1,91 @@
+package controller;
+
+import java.io.IOException;
+import java.util.List;
+import javax.ejb.EJB;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import dao.GreenwichDAOImpl;
+import model.Student;
+import model.StudentAccount;
+
+/**
+ * Controller for managing Student Accounts.
+ * ✅ Modified: Added withdraw and transfer operations.
+ * ✅ Ensured DAO methods are properly integrated.
+ */
+
+@WebServlet(description = "Controller for the main application", urlPatterns = { "/account-controller" })
+public class AccountController extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @EJB
+    private GreenwichDAOImpl greenwichDAOImpl;
+
+    public AccountController() {
+        super();
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if (action == null) action = "list";
+
+        switch (action) {
+            case "list":
+                getAllAccounts(request, response);
+                break;
+            case "add":
+                addAccount(request, response);
+                break;
+            case "update":
+                updateAccount(request, response);
+                break;
+            case "delete":
+                deleteAccount(request, response);
+                break;
+            case "withdraw":
+                withdraw(request, response);  // ✅ New withdraw method added
+                break;
+            case "transfer":
+                transfer(request, response);  // ✅ New transfer method added
+                break;
+            default:
+                getAllAccounts(request, response);
+                break;
+        }
+    }
+
+    private void withdraw(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String accountIdParam = request.getParameter("accountId");
+        String amountParam = request.getParameter("amount");
+
+        if (accountIdParam != null && amountParam != null) {
+            int accountId = Integer.parseInt(accountIdParam);
+            int amount = Integer.parseInt(amountParam);
+            greenwichDAOImpl.withdraw(accountId, amount);  // ✅ Calls DAO method for withdrawal
+        }
+
+        response.sendRedirect("account-controller?action=list");
+    }
+
+    private void transfer(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String fromAccountIdParam = request.getParameter("fromAccountId");
+        String toAccountIdParam = request.getParameter("toAccountId");
+        String amountParam = request.getParameter("amount");
+
+        if (fromAccountIdParam != null && toAccountIdParam != null && amountParam != null) {
+            int fromAccountId = Integer.parseInt(fromAccountIdParam);
+            int toAccountId = Integer.parseInt(toAccountIdParam);
+            int amount = Integer.parseInt(amountParam);
+            greenwichDAOImpl.transfer(fromAccountId, toAccountId, amount);  // ✅ Calls DAO transfer method
+        }
+
+        response.sendRedirect("account-controller?action=list");
+    }
+}
