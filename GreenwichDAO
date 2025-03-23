@@ -1,0 +1,26 @@
+package dao;
+
+import java.util.List;
+import model.Student;
+import model.StudentAccount;
+
+/**
+ * DAO Interface for managing database operations.
+ * ✅ Added withdraw() and transfer() methods.
+ */
+
+public interface GreenwichDAO {
+    void addAccount(String alias, int balance, int ownerId);
+    void updateAccount(int id, String alias, int newBalance);
+    void deleteAccount(int id);
+    List<StudentAccount> getAllAccounts();
+    StudentAccount getAccount(int id);
+    List<Student> getAllStudents();
+
+    void addStudent(String name, String postalAddress, String email, String telephone);
+    void updateStudent(int id, String name, String newPostalAddress, String newEmail, String newTelephone);
+    void deleteStudent(int id);
+
+    void withdraw(int accountId, int amount);  // ✅ Added for withdrawals
+    void transfer(int fromAccountId, int toAccountId, int amount);  // ✅ Added for transfers
+}
