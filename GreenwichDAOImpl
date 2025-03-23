@@ -1,0 +1,48 @@
+package dao;
+
+import java.util.List;
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import model.Student;
+import model.StudentAccount;
+
+/**
+ * DAO Implementation for managing student accounts.
+ * ✅ Implemented withdraw() and transfer() methods.
+ */
+
+@Stateless
+@LocalBean
+public class GreenwichDAOImpl implements GreenwichDAO {
+
+    @PersistenceContext(unitName = "GreenwichBank")
+    EntityManager entityManager;
+
+    @Override
+    public void withdraw(int accountId, int amount) {
+        StudentAccount account = entityManager.find(StudentAccount.class, accountId);
+        if (account != null && account.getBalance() >= amount) {
+            account.setBalance(account.getBalance() - amount);
+            entityManager.merge(account);  // ✅ Persist withdrawal
+        } else {
+            throw new IllegalArgumentException("Insufficient funds or account not found");
+        }
+    }
+
+    @Override
+    public void transfer(int fromAccountId, int toAccountId, int amount) {
+        StudentAccount fromAccount = entityManager.find(StudentAccount.class, fromAccountId);
+        StudentAccount toAccount = entityManager.find(StudentAccount.class, toAccountId);
+
+        if (fromAccount != null && toAccount != null && fromAccount.getBalance() >= amount) {
+            fromAccount.setBalance(fromAccount.getBalance() - amount);
+            toAccount.setBalance(toAccount.getBalance() + amount);
+            entityManager.merge(fromAccount);  // ✅ Update sender's balance
+            entityManager.merge(toAccount);  // ✅ Update receiver's balance
+        } else {
+            throw new IllegalArgumentException("Insufficient funds or accounts not found");
+        }
+    }
+}
